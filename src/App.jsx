@@ -34,8 +34,11 @@ function App() {
       }
 
       setStats(data);
-    } catch (error) {
-      setMessage(error.message);
+    // } catch (error) {
+    //   setMessage(error.message);
+      catch (error) {
+      setMessage(error.message || "Something went wrong!");
+}
     } finally {
       setLoading(false);
     }
