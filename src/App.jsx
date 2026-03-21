@@ -8,11 +8,15 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   const fetchStats = async () => {
-    if (!username.trim()) {
+    const trimmedUsername = username.trim();
+
+    if (!trimmedUsername) {
       setMessage("Please enter a username!");
       setStats(null);
       return;
     }
+
+    if (loading) return;
 
     try {
       setLoading(true);
@@ -20,11 +24,15 @@ function App() {
       setStats(null);
 
       const response = await fetch(
-        `https://leetcode-stats-api.herokuapp.com/${username}`
+        `https://leetcode-stats-api.herokuapp.com/${trimmedUsername}`
       );
 
+      if (response.status === 404) {
+        throw new Error("User not found on LeetCode");
+      }
+
       if (!response.ok) {
-        throw new Error("User not found!");
+        throw new Error("Failed to fetch data");
       }
 
       const data = await response.json();
@@ -34,11 +42,8 @@ function App() {
       }
 
       setStats(data);
-    // } catch (error) {
-    //   setMessage(error.message);
-      catch (error) {
+    } catch (error) {
       setMessage(error.message || "Something went wrong!");
-}
     } finally {
       setLoading(false);
     }
@@ -68,24 +73,17 @@ function App() {
         </button>
       </div>
 
+      {loading && <p>Fetching data...</p>}
+
       {message && <div className="message">{message}</div>}
 
       {stats && !loading && (
         <div className="stats">
           <h2>Statistics for {username}</h2>
-          <p>
-            <strong>Total Problems Solved:</strong>{" "}
-            {stats.totalSolved ?? 0}
-          </p>
-          <p>
-            <strong>Easy:</strong> {stats.easySolved ?? 0}
-          </p>
-          <p>
-            <strong>Medium:</strong> {stats.mediumSolved ?? 0}
-          </p>
-          <p>
-            <strong>Hard:</strong> {stats.hardSolved ?? 0}
-          </p>
+          <p><strong>Total:</strong> {stats.totalSolved ?? 0}</p>
+          <p><strong>Easy:</strong> {stats.easySolved ?? 0}</p>
+          <p><strong>Medium:</strong> {stats.mediumSolved ?? 0}</p>
+          <p><strong>Hard:</strong> {stats.hardSolved ?? 0}</p>
         </div>
       )}
     </div>
